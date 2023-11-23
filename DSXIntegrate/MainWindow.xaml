@@ -1,0 +1,181 @@
+﻿<Window x:Class="DSXIntegrate.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DSXIntegrate" xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" xmlns:views="clr-namespace:YuanliCore.Views;assembly=YuanliCore.Model"
+        mc:Ignorable="d"
+         x:Name="MainWin"
+        Title="MainWindow" Height="900" Width="1600">
+    <Grid  DataContext="{Binding ElementName=MainWin}" >
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.3*" />
+            <RowDefinition  Height="0.2*" />
+            <RowDefinition  Height="2*" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions >
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal">
+                <Label   Height="60" Content="當前Recipe :" FontSize="26" />
+                <TextBox  Height="60" Width="260" Text="ABC12345678" FontSize="26" />
+                <Button  Height="60" Content="選擇Recipe"  FontSize="26"  />
+            </StackPanel>
+            <Button  Content="編輯Recipe"  FontSize="26" Grid.Column="1" Width="180" Height="60"  Command="{Binding OpenRecipeWindowCommand}" Click="Button_Click" />
+            <Button  Content="執行"  FontSize="26" Grid.Column="3" Width="180" Height="60"  Command="{Binding RunCommand}" Click="Button_Click" />
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Border  Grid.Column="0" BorderThickness="2" BorderBrush="Black" >
+                <StackPanel Grid.Column="0" Orientation="Horizontal" >
+                    <TextBlock Text="DSX 3D拼接原圖"  FontSize="32"  />
+                    <Button Margin="10,0,0,0" Content="Read"  FontSize="24" Height="40" Width="150"  Command="{Binding ReadOriginImageCommand}"  />
+
+                    <ListBox Margin="20,0,0,0" Style="{StaticResource MaterialDesignFilterChipPrimaryOutlineListBox}">
+                        <ListBoxItem  Content="垂直鏡像"  IsSelected="{Binding IsVerticalMirror}" />
+                        <ListBoxItem  Content="水平鏡像" IsSelected="{Binding IsHorizontalMirror}" />
+                    </ListBox>
+                 
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" BorderThickness="2" BorderBrush="Black" >
+                <StackPanel Grid.Column="1" Orientation="Horizontal" >
+                    <TextBlock Text="Map座標"  FontSize="32"  />
+
+                </StackPanel>
+            </Border>
+
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <views:VirtualCanvas Grid.Row="0" Grid.Column="0"    ImageSource="{Binding OriginImage}"  ItemsSource="{Binding Drawings}" IsShowBar="False"
+                           IsRederHorizontalMirror="{Binding IsHorizontalMirror}"    IsRederVerticalMirror="{Binding IsVerticalMirror}"      AddShapeAction="{Binding AddShapeAction}"  MousePixcel="{Binding MousePixcel}"  ClearShapeAction="{Binding ClearShapeAction}"  >
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="PreviewMouseDoubleClick">
+                        <i:InvokeCommandAction Command="{Binding MouseDoubleClickCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </views:VirtualCanvas>
+
+            <views:VirtualCanvas Grid.Row="0" Grid.Column="1" ImageSource="{Binding MapImage}" IsShowBar="False"  ItemsSource="{Binding MapDrawings}"
+                                             MousePixcel="{Binding MapMousePixcel}" AddShapeAction="{Binding AddShapeMapAction}" 
+                                             ClearShapeAction="{Binding ClearShapeMapAction}"   >
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="PreviewMouseDoubleClick">
+                        <i:InvokeCommandAction Command="{Binding MapMouseDoubleClickCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </views:VirtualCanvas>
+        </Grid>
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.5*"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <GroupBox Header="高度資訊">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.3*"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="0.3*"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button Margin="10,0,0,0" Height="60"  Content="高度圖 Read"  Width="150"   Command="{Binding ReadHeighImageCommand}" />
+                    <TextBlock Grid.Row="1" Text="高度範圍" FontSize="32"   />
+                    <TextBox Grid.Row="1" Text="1232.45"  Grid.Column="1" FontSize="26" />
+                    <TextBlock Grid.Row="1"  Grid.Column="2"  Text="~"  FontSize="26" />
+                    <TextBox Grid.Row="1" Text="1232.45"  Grid.Column="3" FontSize="26" />
+                </Grid>
+
+            </GroupBox>
+            <GroupBox Header="手動對位" Grid.Column="1">
+                <Border BorderThickness="1" BorderBrush="Black">
+                    <Grid  >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.3*" />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0" Content=" " FontSize="28"   BorderThickness="0,0,1,1"  BorderBrush="Black" Background="Gainsboro" />
+                        <Label Grid.Row="1" Content="原圖" FontSize="28"   BorderThickness="0,0,1,1"  BorderBrush="Black" Background="Gainsboro" />
+                        <Label Grid.Row="2" Content="Map" FontSize="28"   BorderThickness="0,0,1,0"  BorderBrush="Black" Background="Gainsboro" />
+                        <Label Grid.Row="0" Grid.Column="1" Content="1" FontSize="28"   BorderThickness="0,0,1,1"  BorderBrush="Black" Background="Gainsboro" />
+                        <Label Grid.Row="0" Grid.Column="2"  Content="2" FontSize="28"   BorderThickness="0,0,1,1"  BorderBrush="Black" Background="Gainsboro" />
+                        <Label Grid.Row="0" Grid.Column="3"  Content="3" FontSize="28"   BorderThickness="0,0,1,0"  BorderBrush="Black" Background="Gainsboro" />
+                        <Border  Grid.Column="1" Grid.Row="1"  BorderThickness="0,0,1,1"  BorderBrush="Black" >
+                            <StackPanel  Orientation="Horizontal" >
+                                <TextBox Width="100" FontSize="26" Height="50" Text="{Binding OriPointX1}"    Margin="1"/>
+                                <TextBox Width="100" FontSize="26"  Height="50" Text="{Binding OriPointY1}"   Margin="1" />
+                                <Button  Width="80"   Height="50" Content="點選" FontSize="20"  Margin="2"  Command="{Binding OringinImageClickCommand}" CommandParameter="1" />
+                            </StackPanel>
+                        </Border>
+                        <Border  Grid.Column="2" Grid.Row="1"  BorderThickness="0,0,1,1"  BorderBrush="Black" >
+                            <StackPanel  Orientation="Horizontal" >
+                                <TextBox Width="100" Height="50"  Text="{Binding OriPointX2}"  FontSize="26" Margin="1"/>
+                                <TextBox Width="100"  Height="50" Text="{Binding OriPointY2}"   FontSize="26" Margin="1" />
+                                <Button  Width="80"   Height="50" Content="點選" FontSize="20"  Margin="2"  Command="{Binding OringinImageClickCommand}" CommandParameter="2" />
+                            </StackPanel>
+                        </Border>
+                        <Border  Grid.Column="3" Grid.Row="1"  BorderThickness="0,1,1,1"  BorderBrush="Black" >
+                            <StackPanel  Orientation="Horizontal" >
+                                <TextBox Width="100" Height="50"  Text="{Binding OriPointX3}"  FontSize="26" Margin="1"/>
+                                <TextBox Width="100"  Height="50" Text="{Binding OriPointY3}" FontSize="26"  Margin="1" />
+                                <Button  Width="80"   Height="50" Content="點選" FontSize="20"  Margin="2"  Command="{Binding OringinImageClickCommand}" CommandParameter="3" />
+                            </StackPanel>
+                        </Border>
+                        <Border  Grid.Column="1" Grid.Row="2"  BorderThickness="0,1,1,1"  BorderBrush="Black" >
+                            <StackPanel  Orientation="Horizontal" >
+                                <TextBox Width="100" Height="50" Text="{Binding MapPointX1}"   FontSize="26" Margin="1"/>
+                                <TextBox Width="100" Height="50" Text="{Binding MapPointY1}"  FontSize="26" Margin="1" />
+                                <Button  Width="80"   Height="50" Content="點選" FontSize="20"  Margin="2"  Command="{Binding MapImageClickCommand}" CommandParameter="1" />
+                            </StackPanel>
+                        </Border>
+                        <Border  Grid.Column="2" Grid.Row="2"  BorderThickness="0,1,1,1"  BorderBrush="Black" >
+                            <StackPanel  Orientation="Horizontal" >
+                                <TextBox Width="100" Height="50" Text="{Binding MapPointX2}"  FontSize="26" Margin="1"/>
+                                <TextBox Width="100" Height="50" Text="{Binding MapPointY2}"  FontSize="26" Margin="1" />
+                                <Button  Width="80"   Height="50" Content="點選" FontSize="20"  Margin="2"  Command="{Binding MapImageClickCommand}" CommandParameter="2" />
+                            </StackPanel>
+                        </Border>
+                        <Border  Grid.Column="3" Grid.Row="2"  BorderThickness="0,1,1,1"  BorderBrush="Black" >
+                            <StackPanel  Orientation="Horizontal" >
+                                <TextBox Width="100" Height="50" Text="{Binding MapPointX3}"  FontSize="26" Margin="1"/>
+                                <TextBox Width="100" Height="50" Text="{Binding MapPointY3}" FontSize="26" Margin="1" />
+                                <Button  Width="80"   Height="50" Content="點選" FontSize="20"  Margin="2"  Command="{Binding MapImageClickCommand}" CommandParameter="3" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+
+            </GroupBox>
+        </Grid>
+
+    </Grid>
+</Window>
