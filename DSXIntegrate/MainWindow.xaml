@@ -25,15 +25,21 @@
             <StackPanel Orientation="Horizontal">
                 <Label   Height="60" Content="當前Recipe :" FontSize="26" />
                 <TextBox  Height="60" Width="260" Text="ABC12345678" FontSize="26" />
-                <Button  Height="60" Content="選擇Recipe"  FontSize="26"  />
+                <Button  Height="60" Content="選擇Recipe"  Command="{Binding SelectRecipeCommand}" FontSize="26"  />
             </StackPanel>
-            <Button  Content="編輯Recipe"  FontSize="26" Grid.Column="1" Width="180" Height="60"  Command="{Binding OpenRecipeWindowCommand}" Click="Button_Click" />
-            <Button  Content="執行"  FontSize="26" Grid.Column="3" Width="180" Height="60"  Command="{Binding RunCommand}" Click="Button_Click" />
+
+            <Button  Content="編輯Recipe"  FontSize="26" Grid.Column="1" Width="180" Height="60"  Command="{Binding OpenRecipeWindowCommand}" />
+            <StackPanel Orientation="Horizontal"  Grid.Column="3" >
+                <Button Margin="5" Content="對位"  FontSize="26" Grid.Column="3" Width="140" Height="60"  Command="{Binding LocateCommand}"   />
+                <Button Margin="5" Content="輸出"  FontSize="26" Grid.Column="3" Width="140" Height="60"  Command="{Binding RunCommand}"   />
+            </StackPanel>
+          
         </Grid>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
+                <ColumnDefinition Width="0.1*"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Border  Grid.Column="0" BorderThickness="2" BorderBrush="Black" >
@@ -49,17 +55,21 @@
                 </StackPanel>
             </Border>
 
-            <Border Grid.Column="1" BorderThickness="2" BorderBrush="Black" >
+            <Border Grid.Column="2" BorderThickness="2" BorderBrush="Black" >
                 <StackPanel Grid.Column="1" Orientation="Horizontal" >
                     <TextBlock Text="Map座標"  FontSize="32"  />
 
                 </StackPanel>
             </Border>
+            
+            <Border Margin="1" Grid.Column="1" BorderThickness="2" BorderBrush="Black" >
 
+            </Border>
         </Grid>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
+                <ColumnDefinition Width="0.15*"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <views:VirtualCanvas Grid.Row="0" Grid.Column="0"    ImageSource="{Binding OriginImage}"  ItemsSource="{Binding Drawings}" IsShowBar="False"
@@ -71,7 +81,7 @@
                 </i:Interaction.Triggers>
             </views:VirtualCanvas>
 
-            <views:VirtualCanvas Grid.Row="0" Grid.Column="1" ImageSource="{Binding MapImage}" IsShowBar="False"  ItemsSource="{Binding MapDrawings}"
+            <views:VirtualCanvas Grid.Row="0" Grid.Column="2" ImageSource="{Binding MapImage}" IsShowBar="False"  ItemsSource="{Binding MapDrawings}"
                                              MousePixcel="{Binding MapMousePixcel}" AddShapeAction="{Binding AddShapeMapAction}" 
                                              ClearShapeAction="{Binding ClearShapeMapAction}"   >
                 <i:Interaction.Triggers>
@@ -80,6 +90,27 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </views:VirtualCanvas>
+
+            <Border Margin="1" Grid.Column="1" BorderThickness="2" BorderBrush="Black" >
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Slider  Grid.Column="0"  Orientation="Vertical"  Maximum="200" Minimum="0" Style="{StaticResource MaterialDesignDiscreteSlider}" TickFrequency="10" TickPlacement="BottomRight" Value="{Binding ROISize}"   >
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="ValueChanged">
+                                <i:InvokeCommandAction Command="{Binding CropROIChangeCommand}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Slider>
+                    <Slider  Grid.Column="1"  Orientation="Vertical"  Maximum="200" Minimum="0" Style="{StaticResource MaterialDesignDiscreteSlider}"  
+                             SelectionEnd="90"   SelectionStart="50" TickFrequency="10" TickPlacement="BottomRight" Value="40" />
+
+                </Grid>
+              
+            </Border>
         </Grid>
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
@@ -102,9 +133,13 @@
                     </Grid.ColumnDefinitions>
                     <Button Margin="10,0,0,0" Height="60"  Content="高度圖 Read"  Width="150"   Command="{Binding ReadHeighImageCommand}" />
                     <TextBlock Grid.Row="1" Text="高度範圍" FontSize="32"   />
-                    <TextBox Grid.Row="1" Text="1232.45"  Grid.Column="1" FontSize="26" />
+                    <TextBox Grid.Row="1" Text="{Binding HeightValueMin}"  Grid.Column="1" FontSize="26" />
                     <TextBlock Grid.Row="1"  Grid.Column="2"  Text="~"  FontSize="26" />
-                    <TextBox Grid.Row="1" Text="1232.45"  Grid.Column="3" FontSize="26" />
+                    <TextBox Grid.Row="1" Text="{Binding HeightValueMax}"  Grid.Column="3" FontSize="26" />
+
+                    <TextBox Grid.Row="2" Text="{Binding RValue}"  Grid.Column="0" FontSize="26" />
+                    <TextBox Grid.Row="2" Text="{Binding GValue}"  Grid.Column="1" FontSize="26" />
+                    <TextBox Grid.Row="2" Text="{Binding BValue}"  Grid.Column="3" FontSize="26" />
                 </Grid>
 
             </GroupBox>

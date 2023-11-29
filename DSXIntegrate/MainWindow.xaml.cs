@@ -33,7 +33,9 @@ namespace DSXIntegrate
         private string logMessage;
         private IEnumerable<MatchResult> resultPoint;
         private BitmapSource mapImage;
-        private BitmapSource originImage;
+        private WriteableBitmap originImage;
+        private BitmapSource heightContourImage;
+
         private double oriPointX1, oriPointY1, oriPointX2, oriPointY2, oriPointX3, oriPointY3;
         private double mapPointX1, mapPointY1, mapPointX2, mapPointY2, mapPointX3, mapPointY3;
         private ClickOrigin buttonClickOrigin;
@@ -42,7 +44,14 @@ namespace DSXIntegrate
         private ObservableCollection<ROIShape> drawings = new ObservableCollection<ROIShape>();
         private System.Windows.Point mousePixcel;
         private System.Windows.Point mapmousePixcel;
-        private bool isHorizontalMirror, isVerticalMirror; 
+        private bool isHorizontalMirror, isVerticalMirror;
+
+        private int rValue, gValue, bValue;
+        private double heightValueMax = 1240.56, heightValueMin = -562.22;
+        private Rect[] transToOriRect;
+        private int roiSize =50;
+
+
         public MainWindow()
         {
             InitializeComponent();
@@ -54,7 +63,10 @@ namespace DSXIntegrate
 
 
         public BitmapSource MapImage { get => mapImage; set => SetValue(ref mapImage, value); }
-        public BitmapSource OriginImage { get => originImage; set => SetValue(ref originImage, value); }
+        public WriteableBitmap OriginImage { get => originImage; set => SetValue(ref originImage, value); }
+        public BitmapSource HeightContourImage { get => heightContourImage; set => SetValue(ref heightContourImage, value); }
+
+
         public string LogMessage { get => logMessage; set => SetValue(ref logMessage, value); }
         /// <summary>
         /// 滑鼠在影像內 Pixcel 座標
@@ -75,6 +87,13 @@ namespace DSXIntegrate
         public double MapPointX3 { get => mapPointX3; set => SetValue(ref mapPointX3, value); }
         public double MapPointY3 { get => mapPointY3; set => SetValue(ref mapPointY3, value); }
 
+        public double HeightValueMax { get => heightValueMax; set => SetValue(ref heightValueMax, value); }
+        public double HeightValueMin { get => heightValueMin; set => SetValue(ref heightValueMin, value); }
+
+        public int RValue { get => rValue; set => SetValue(ref rValue, value); }
+        public int GValue { get => gValue; set => SetValue(ref gValue, value); }
+        public int BValue { get => bValue; set => SetValue(ref bValue, value); }
+
         /// <summary>
         /// 水平鏡像
         /// </summary>
@@ -84,7 +103,7 @@ namespace DSXIntegrate
         /// 垂直鏡像
         /// </summary>
         public bool IsVerticalMirror { get => isVerticalMirror; set => SetValue(ref isVerticalMirror, value); }
-
+        public int ROISize { get => roiSize; set => SetValue(ref roiSize, value); }
 
 
         /// <summary>
@@ -125,7 +144,7 @@ namespace DSXIntegrate
                     var bms = CreateBmp(dlg.FileName);
 
                     OriginImage = new WriteableBitmap(bms);
-                
+
                     //var aaaa=  yuanliVision.ReadImage(dlg.FileName);
                     //  MainImage = new WriteableBitmap(aaaa);
                     //  ImageSouce = aaaa;
@@ -141,7 +160,19 @@ namespace DSXIntegrate
         });
 
 
-        public ICommand OpenRecipeWindowCommand => new RelayCommand<string>(async key =>
+        public ICommand SelectRecipeCommand => new RelayCommand<string>(async key =>
+        {
+            //WriteableBitmap writeableBitmap = new WriteableBitmap(HeightContourImage);
+
+
+            //var value = GetPixelGrayValue(writeableBitmap, (int)HeightValueMin, (int)HeightValueMax);
+
+            //RValue = value.red;
+            //GValue = value.green;
+            //BValue = value.blue;
+
+        });
+        public ICommand OpenRecipeWindowCommand => new RelayCommand(() =>
         {
             try
             {
@@ -206,63 +237,63 @@ namespace DSXIntegrate
             }
 
         });
-        public ICommand OringinImageClickCommand => new RelayCommand<string>(async key =>
-        {
-            try
-            {
+        public ICommand OringinImageClickCommand => new RelayCommand<string>(key =>
+      {
+          try
+          {
 
 
 
-                switch (key)
-                {
-                    case "1":
-                        buttonClickOrigin = ClickOrigin.Point1;
-                        break;
+              switch (key)
+              {
+                  case "1":
+                      buttonClickOrigin = ClickOrigin.Point1;
+                      break;
 
-                    case "2":
-                        buttonClickOrigin = ClickOrigin.Point2;
-                        break;
+                  case "2":
+                      buttonClickOrigin = ClickOrigin.Point2;
+                      break;
 
-                    case "3":
-                        buttonClickOrigin = ClickOrigin.Point3;
-                        break;
-
-
-                    default:
-                        break;
-                }
+                  case "3":
+                      buttonClickOrigin = ClickOrigin.Point3;
+                      break;
 
 
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-
-        });
-
-        public ICommand MapImageClickCommand => new RelayCommand<string>(async key =>
-        {
-            switch (key)
-            {
-                case "1":
-                    buttonClickMap = ClickMap.Point1;
-                    break;
-
-                case "2":
-                    buttonClickMap = ClickMap.Point2;
-                    break;
-
-                case "3":
-                    buttonClickMap = ClickMap.Point3;
-                    break;
+                  default:
+                      break;
+              }
 
 
-                default:
-                    break;
-            }
-        });
-        public ICommand MouseDoubleClickCommand => new RelayCommand<string>(async key =>
+          }
+          catch (Exception ex)
+          {
+              MessageBox.Show(ex.Message);
+          }
+
+      });
+
+        public ICommand MapImageClickCommand => new RelayCommand<string>(key =>
+      {
+          switch (key)
+          {
+              case "1":
+                  buttonClickMap = ClickMap.Point1;
+                  break;
+
+              case "2":
+                  buttonClickMap = ClickMap.Point2;
+                  break;
+
+              case "3":
+                  buttonClickMap = ClickMap.Point3;
+                  break;
+
+
+              default:
+                  break;
+          }
+      });
+        public ICommand MouseDoubleClickCommand => new RelayCommand(() =>
         {
             try
             {
@@ -292,6 +323,12 @@ namespace DSXIntegrate
             }
 
         });
+        public ICommand CropROIChangeCommand => new RelayCommand(() =>
+        {
+
+
+        });
+        
 
         public ICommand MapMouseDoubleClickCommand => new RelayCommand<string>(async key =>
         {
@@ -337,8 +374,25 @@ namespace DSXIntegrate
             try
             {
 
+                Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+                dlg.Filter = "Bitmap Files (*.bmp, *.jpg ,*.png)|*.bmp;*.jpg;*.png|All files (*.*)|*.*";
+
+                Nullable<bool> result = dlg.ShowDialog();
+                if (result == true)
+                {// 載入圖片
 
 
+                    var bms = CreateBmp(dlg.FileName);
+
+                    HeightContourImage = new WriteableBitmap(bms);
+
+                    //var aaaa=  yuanliVision.ReadImage(dlg.FileName);
+                    //  MainImage = new WriteableBitmap(aaaa);
+                    //  ImageSouce = aaaa;
+
+
+                }
             }
             catch (Exception ex)
             {
@@ -346,10 +400,12 @@ namespace DSXIntegrate
             }
 
         });
-        public ICommand RunCommand => new RelayCommand<string>(async key =>
+
+        public ICommand LocateCommand => new RelayCommand<string>(async key =>
         {
             try
             {
+                //三點對位
                 System.Windows.Point[] oriPoints = new System.Windows.Point[] {
                     new System.Windows.Point(OriPointX1, OriPointY1) ,
                     new System.Windows.Point(OriPointX2, OriPointY2) ,
@@ -363,42 +419,103 @@ namespace DSXIntegrate
 
                 CogAffineTransform cogAffineTransform = new CogAffineTransform(mapPoints, oriPoints);
 
-                List<System.Windows.Point> toOriPoint = new List<System.Windows.Point>();
+
                 ClearShapeAction.Execute(Drawings);
-                foreach (var result in resultPoint)
+
+
+
+                var transToOriPoint = resultPoint.Select(r => cogAffineTransform.TransPoint(r.Center)).ToArray(); ;
+
+               
+                int rectW = ROISize * 2;
+                int rectH = ROISize * 2;
+                int i = 1;
+                List<Rect> rects = new List<Rect>();
+                foreach (var point in transToOriPoint)
                 {
 
-                    var transPoint = cogAffineTransform.TransPoint(result.Center);
-                    toOriPoint.Add(transPoint);
+                    ROIRotatedRect rect = CreateDrawingRect(point, ROISize, ROISize, i.ToString());
+
+                    AddShapeAction.Execute(rect);
+
+                    rects.Add(new Rect(point.X - rectW / 2, point.Y - rectH / 2, rectW, rectH));
+                    i++;
+                }
+                transToOriRect = rects.ToArray();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+        });
+        public ICommand RunCommand => new RelayCommand<string>(async key =>
+        {
+            try
+            {
+                int i = 1;
+                BitmapSource originImg = OriginImage.Clone();
+                BitmapSource heightContourImage = HeightContourImage.Clone();
+                if (IsHorizontalMirror)
+                {
+                    originImg = originImg.Flip(FlipTypes.Horizontal);
+                    heightContourImage = heightContourImage.Flip(FlipTypes.Horizontal);
+
                 }
 
-                int roiW = 70, roiH = 70;
-                int i = 1;
 
-                foreach (var item in toOriPoint)
+                if (IsVerticalMirror)
+                {
+                    originImg = originImg.Flip(FlipTypes.Vertical);
+                    heightContourImage = heightContourImage.Flip(FlipTypes.Horizontal);
+                }
+
+
+
+                //   originImg.Save("D:\\ASD\\ori");
+                //   heightContourImage.Save("D:\\ASD\\heightContour");
+                WriteableBitmap heightContourbitmap = new WriteableBitmap(heightContourImage);
+                var wbmp = new WriteableBitmap(originImg);
+                foreach (var rect in transToOriRect)
                 {
 
-                    var center = new ROIRotatedRect
-                    {
-                        X = item.X,
-                        Y = item.Y,
-                        LengthX = roiW,
-                        LengthY = roiH,
-                        StrokeThickness = 4,
-                        Stroke = System.Windows.Media.Brushes.Green,
-                        IsInteractived = false,
-                        IsCenterShow = false,
-                        ToolTip = $" SN= {i}  X:{item.X} Y:{item.Y} "
-
-                    };
-
-                    AddShapeAction.Execute(center);
-
-                    if (center.LeftTop.X < 0 || center.LeftTop.Y < 0 || center.RightBottom.X > OriginImage.Width || center.RightBottom.Y > OriginImage.Height)
+                    if (rect.TopLeft.X < 0 || rect.TopLeft.Y < 0 || rect.BottomRight.X > originImg.Width || rect.BottomRight.Y > originImg.Height)
                     {
                         continue;
                     }
-                    Int32Rect cropRect = new Int32Rect((int)center.LeftTop.X, (int)center.LeftTop.Y, roiW * 2, roiH * 2);
+
+                    Point ltPoint = rect.TopLeft;
+                    Point rtPoint = rect.TopRight;
+                    Point lbPoint = rect.BottomLeft;
+                    Point rbPoint = rect.BottomRight;
+                    Point centerPoint = new Point(rect.TopLeft.X + rect.Width / 2, rect.TopLeft.Y + rect.Height / 2);
+
+                    //三個色階數值一樣  隨便取一個都可以 ，所以取藍色
+                    int ltGray = GetPixelGrayValue(heightContourbitmap, ltPoint).blue;
+                    int rtGray = GetPixelGrayValue(heightContourbitmap, rtPoint).blue;
+                    int lbGray = GetPixelGrayValue(heightContourbitmap, lbPoint).blue;
+                    int rbGray = GetPixelGrayValue(heightContourbitmap, rbPoint).blue;
+                    int ctGray = GetPixelGrayValue(heightContourbitmap, centerPoint).blue;
+
+                    //將色階去 乘高度範圍
+                    var heightRate = (HeightValueMax - HeightValueMin) / 255;
+
+                    var ltHeigh = (ltGray * heightRate) + HeightValueMin;
+                    var rtHeigh = (rtGray * heightRate) + HeightValueMin;
+                    var lbHeigh = (lbGray * heightRate) + HeightValueMin;
+                    var rbHeigh = (rbGray * heightRate) + HeightValueMin;
+                    var ctHeigh = (ctGray * heightRate) + HeightValueMin;
+
+                    var avg = (ltHeigh + rtHeigh + lbHeigh + rbHeigh + ctHeigh) / 5;
+
+
+
+
+
+                    CropImage(wbmp, $"SN-{i}_PX{centerPoint.X.Round(1)}_PY{centerPoint.Y.Round(1)}_H{avg.Round(1)}",
+                        (int)ltPoint.X, (int)ltPoint.Y, (int)rect.Width, (int)rect.Height);
+
+                    // Int32Rect cropRect = new Int32Rect((int)rect.LeftTop.X, (int)rect.LeftTop.Y, roiW * 2, roiH * 2);
                     //           var bmp = new CroppedBitmap(OriginImage, cropRect);
                     //            bmp.Save($"D:\\ASD\\TEST\\{i}.bmp");
 
@@ -413,6 +530,32 @@ namespace DSXIntegrate
 
         });
 
+        private ROIRotatedRect CreateDrawingRect(Point point, double heigh, double width, string name = "")
+        {
+
+            var center = new ROIRotatedRect
+            {
+                X = point.X,
+                Y = point.Y,
+                LengthX = width,
+                LengthY = heigh,
+                StrokeThickness = 4,
+                Stroke = System.Windows.Media.Brushes.Green,
+                IsInteractived = false,
+                IsCenterShow = false,
+                ToolTip = $" SN= {name}  X:{point.X} Y:{point.Y} "
+
+            };
+
+            return center;
+        }
+
+        private void CropImage(WriteableBitmap writeableBitmap, string name, int leftTopX, int leftTopY, int width, int heigh)
+        {
+            Int32Rect cropRect = new Int32Rect(leftTopX, leftTopY, width, heigh);
+            var bmp = new CroppedBitmap(writeableBitmap, cropRect);
+            bmp.Save($"D:\\TEST\\{name}");
+        }
 
         private static BitmapSource ConvertBitmapToBitmapSource(System.Drawing.Bitmap bitmap)
         {
@@ -426,7 +569,24 @@ namespace DSXIntegrate
             return bitmapSource;
         }
 
+        private (byte blue, byte green, byte red) GetPixelGrayValue(WriteableBitmap writeableBitmap, Point pixel)
+        {
 
+            int colorLayer = 3;
+
+            // 使用 WriteableBitmap 訪問像素
+            Int32Rect rect = new Int32Rect((int)pixel.X, (int)pixel.Y, 1, 1);
+            int stride = colorLayer * writeableBitmap.PixelWidth; // 4 bytes per pixel (Bgra32 format)
+            byte[] pixels = new byte[colorLayer];
+
+            writeableBitmap.CopyPixels(rect, pixels, stride, 0);
+
+
+            byte blue = pixels[0];
+            byte green = pixels[1];
+            byte red = pixels[2];
+            return (blue, green, red);
+        }
 
         private BitmapSource CreateBmp(string path)
         {
@@ -467,10 +627,6 @@ namespace DSXIntegrate
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
 
 
 
