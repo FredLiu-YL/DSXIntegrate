@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -49,7 +49,7 @@ namespace DSXIntegrate
         private int rValue, gValue, bValue;
         private double heightValueMax = 1240.56, heightValueMin = -562.22;
         private Rect[] transToOriRect;
-        private int roiSize =50;
+        private int roiSize = 50;
 
 
         public MainWindow()
@@ -328,7 +328,7 @@ namespace DSXIntegrate
 
 
         });
-        
+
 
         public ICommand MapMouseDoubleClickCommand => new RelayCommand<string>(async key =>
         {
@@ -426,7 +426,7 @@ namespace DSXIntegrate
 
                 var transToOriPoint = resultPoint.Select(r => cogAffineTransform.TransPoint(r.Center)).ToArray(); ;
 
-               
+
                 int rectW = ROISize * 2;
                 int rectH = ROISize * 2;
                 int i = 1;
@@ -453,6 +453,16 @@ namespace DSXIntegrate
         {
             try
             {
+                // 獲取當前時間
+                DateTime currentTime = DateTime.Now;
+
+                // 將當前時間轉換為資料夾名稱格式（例如：2023-02-14）
+                string folderName = currentTime.ToString("MM-dd-HH-mm-ss");
+                string folderPath = $"C:\\TEST\\{folderName}";
+
+                // 創建資料夾
+                Directory.CreateDirectory(folderPath);
+
                 int i = 1;
                 BitmapSource originImg = OriginImage.Clone();
                 BitmapSource heightContourImage = HeightContourImage.Clone();
@@ -472,8 +482,9 @@ namespace DSXIntegrate
 
 
 
-                //   originImg.Save("D:\\ASD\\ori");
-                //   heightContourImage.Save("D:\\ASD\\heightContour");
+
+
+
                 WriteableBitmap heightContourbitmap = new WriteableBitmap(heightContourImage);
                 var wbmp = new WriteableBitmap(originImg);
                 foreach (var rect in transToOriRect)
@@ -511,10 +522,10 @@ namespace DSXIntegrate
 
 
 
+                    string imageName = $"SN-{i}_PX{centerPoint.X.Round(1)}_PY{centerPoint.Y.Round(1)}_H{avg.Round(1)}";
+                    var bmp = CropImage(wbmp, (int)ltPoint.X, (int)ltPoint.Y, (int)rect.Width, (int)rect.Height);
 
-                    CropImage(wbmp, $"SN-{i}_PX{centerPoint.X.Round(1)}_PY{centerPoint.Y.Round(1)}_H{avg.Round(1)}",
-                        (int)ltPoint.X, (int)ltPoint.Y, (int)rect.Width, (int)rect.Height);
-
+                    bmp.Save($"{folderPath}\\{imageName}");
                     // Int32Rect cropRect = new Int32Rect((int)rect.LeftTop.X, (int)rect.LeftTop.Y, roiW * 2, roiH * 2);
                     //           var bmp = new CroppedBitmap(OriginImage, cropRect);
                     //            bmp.Save($"D:\\ASD\\TEST\\{i}.bmp");
@@ -550,11 +561,12 @@ namespace DSXIntegrate
             return center;
         }
 
-        private void CropImage(WriteableBitmap writeableBitmap, string name, int leftTopX, int leftTopY, int width, int heigh)
+        private BitmapSource CropImage(WriteableBitmap writeableBitmap, int leftTopX, int leftTopY, int width, int heigh)
         {
             Int32Rect cropRect = new Int32Rect(leftTopX, leftTopY, width, heigh);
-            var bmp = new CroppedBitmap(writeableBitmap, cropRect);
-            bmp.Save($"D:\\TEST\\{name}");
+            CroppedBitmap bmp = new CroppedBitmap(writeableBitmap, cropRect);
+            return bmp;
+
         }
 
         private static BitmapSource ConvertBitmapToBitmapSource(System.Drawing.Bitmap bitmap)

@@ -72,7 +72,7 @@
                 <ColumnDefinition Width="0.15*"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <views:VirtualCanvas Grid.Row="0" Grid.Column="0"    ImageSource="{Binding OriginImage}"  ItemsSource="{Binding Drawings}" IsShowBar="False"
+            <views:VirtualCanvas Grid.Row="0" Grid.Column="0"    ImageSource="{Binding OriginImage}"  ItemsSource="{Binding Drawings}"  
                            IsRederHorizontalMirror="{Binding IsHorizontalMirror}"    IsRederVerticalMirror="{Binding IsVerticalMirror}"      AddShapeAction="{Binding AddShapeAction}"  MousePixcel="{Binding MousePixcel}"  ClearShapeAction="{Binding ClearShapeAction}"  >
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="PreviewMouseDoubleClick">
